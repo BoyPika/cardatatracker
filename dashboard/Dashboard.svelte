@@ -4,35 +4,103 @@
     import {onMount} from 'svelte';
 
     let oilItems = {};
+    let gasItems = {};
 
     const pb = new PocketBase('http://127.0.0.1:8090');
-    async function retrieveOilData() {
+    async function retrieveData() {
         try {
             const oilData = await pb.collection('oil').getOne(pb.authStore.record.id);
+            const gasData = await pb.collection('gas').getOne(pb.authStore.record.id);
             console.log(oilData);
-
-            oilItems = oilData.oilChanges;
-
+            console.log(gasData);
+            oilItems = oilData.oil;
+            gasItems = gasData.gas;
             console.log(oilItems);
+            console.log(gasItems);
 
         } catch (e) {
             console.error(e);
         }
     }
 
+    async function updateGasData() {
+        const gasData = await pb.collection('gas').getOne(pb.authStore.record.id);
+        const lastMileage = gasData.gasLastMileage
+
+        let gas = gasData.gas = Object.assign({}, gasData.gas, {
+            "10-11-2026": {
+                "gallons": 15,
+                "lastMileage": lastMileage,
+                "mileage": 2500
+            }
+        })
+
+        let body = {
+            gas,
+            "gasLastMileage": 2500
+        }
+
+        console.log(body);
+
+        await pb.collection('users').update(pb.authStore.record.id, body)
+    }
+
     onMount(() => {
-        retrieveOilData();
+        retrieveData();
     })
 
 </script>
 
 <table>
+    <thead>
+    <tr>
+        <th colspan="4">Oil Changes</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>Date</th>
+        <th>Mileage</th>
+        <th>Type</th>
+        <th>Quarts</th>
+    </tr>
+    </tbody>
 {#each Object.entries(oilItems) as [date, item]}
     <tbody>
-    <tr><td>Date Changed: {date}</td></tr>
-    <tr><td>Mileage at Time of Change: {item.mileage}</td></tr>
-    <tr><td>Type of Oil: {item.type}</td></tr>
-    <tr><td>Quarts Added: {item.qtrs}</td></tr>
+    <tr><td>{date}</td>
+    <td>{item.mileage}</td>
+    <td>{item.type}</td>
+    <td>{item.qtrs}</td></tr>
     </tbody>
 {/each}
 </table>
+
+<button class="cursor-pointer">Add Oil Change</button>
+
+<br>
+
+<table>
+    <thead>
+    <tr>
+        <th colspan="4">Gas</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>Date</th>
+        <th>Mileage</th>
+        <th>Gallons</th>
+        <th>MPG</th>
+    </tr>
+    </tbody>
+    {#each Object.entries(gasItems) as [date, item]}
+        <tbody>
+        <tr><td>{date}</td>
+            <td>{item.mileage}</td>
+            <td>{item.gallons}</td>
+            <td>{(((item.mileage)-(item.lastMileage))/(item.lastGallons)).toFixed(2)}</td></tr>
+        </tbody>
+    {/each}
+</table>
+
+<button class="cursor-pointer" on:click={updateGasData}>Add Gas Trip</button>
