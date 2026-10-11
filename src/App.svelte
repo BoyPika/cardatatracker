@@ -2,6 +2,7 @@
 	import './app.css';
     import PocketBase from 'pocketbase';
     import { Card, Button, Label, Input, Checkbox } from "flowbite-svelte";
+    import Header from './lib/Header.svelte'
     const pb = new PocketBase('http://localhost:8090/')
     function github() {
         pb.collection('users').authWithOAuth2({
@@ -13,21 +14,31 @@
             }
         })
     }
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark')
+    }
 </script>
-
-<Card class="p-4 sm:p-6 md:p-8">
+<Header />
+<main class="card">
+<Card class="p-4 sm:p-6 md:p-8 border">
     <form class="flex flex-col space-y-6" action="/dashboard/">
-        <h3>Login</h3>
+        <h3 class="text-center">Login</h3>
         <Label class="space-y-2">
             <span>Email</span>
-            <Input type="email" name="email" placeholder="user@email.com" required />
+            <Input type="email" name="email" placeholder="user@email.com" />
         </Label>
         <Label class="space-y-2">
             <span>Password</span>
-            <Input type="password" name="password" placeholder="•••••" required />
+            <Input type="password" name="password" placeholder="•••••" />
         </Label>
+        <Button class="text-right">Forgot Password</Button>
         <Button class="w-full" type="submit">Login</Button>
-        <button class="w-full" on:click={github}>Login With GitHub</button>
     </form>
+    <br>
+    <Button class="w-full" onclick={github}>Login With GitHub</Button>
 </Card>
+    </main>
 

@@ -1,6 +1,7 @@
 <script>
 	import '/src/app.css';
     import PocketBase from 'pocketbase';
+    import Header from '/src/lib/Header.svelte'
     import {onMount} from 'svelte';
 
     let oilItems = {};
@@ -26,9 +27,10 @@
     async function updateGasData() {
         const gasData = await pb.collection('gas').getOne(pb.authStore.record.id);
         const lastMileage = gasData.gasLastMileage
+        const date = Math.floor(Date.parse() / 1000)
 
         let gas = gasData.gas = Object.assign({}, gasData.gas, {
-            "10-11-2026": {
+            date: {
                 "gallons": 15,
                 "lastMileage": lastMileage,
                 "mileage": 2500
@@ -51,6 +53,8 @@
 
 </script>
 
+<Header />
+
 <table>
     <thead>
     <tr>
@@ -67,7 +71,7 @@
     </tbody>
 {#each Object.entries(oilItems) as [date, item]}
     <tbody>
-    <tr><td>{date}</td>
+    <tr><td>{new Date(date * 1000).toLocaleDateString()}</td>
     <td>{item.mileage}</td>
     <td>{item.type}</td>
     <td>{item.qtrs}</td></tr>
@@ -95,7 +99,7 @@
     </tbody>
     {#each Object.entries(gasItems) as [date, item]}
         <tbody>
-        <tr><td>{date}</td>
+        <tr><td>{new Date(date * 1000).toLocaleDateString()}</td>
             <td>{item.mileage}</td>
             <td>{item.gallons}</td>
             <td>{(((item.mileage)-(item.lastMileage))/(item.lastGallons)).toFixed(2)}</td></tr>
