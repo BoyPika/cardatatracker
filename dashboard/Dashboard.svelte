@@ -17,7 +17,7 @@
     let qrts = $state();
     let gallons = $state();
 
-    const pb = new PocketBase('http://127.0.0.1:8090');
+    const pb = new PocketBase('https://database.hornethub.xyz/');
     async function retrieveData() {
         try {
             const oilData = await pb.collection('oil').getOne(pb.authStore.record.id);
@@ -34,18 +34,21 @@
         }
     }
 
-    async function updateGasData() {
+    async function updateGasData(event) {
+        event.preventDefault();
         const gasData = await pb.collection('gas').getOne(pb.authStore.record.id);
-        const lastMileage = await pb.collection('gasLastMileage').getOne(pb.authStore.record.id).gasLastMileage;
+        const lastMileage = await pb.collection('gasLastMileage').getOne(pb.authStore.record.id);
         const gasDate = Math.floor(Date.now(date) / 1000)
-        console.log(lastMileage);
+        const mpg = ((mileage - lastMileage.gasLastMileage) / parseFloat(gallons)).toFixed(2);
+        console.log(lastMileage.gasLastMileage);
         console.log(gasDate)
 
         let gas = gasData.gas = Object.assign({}, gasData.gas, {
             [gasDate]: {
-                "gallons": gallons,
-                "lastMileage": lastMileage,
-                "mileage": mileage
+                "gallons": parseFloat(gallons),
+                "lastMileage": lastMileage.gasLastMileage,
+                "mileage": mileage,
+                "mpg": parseFloat(mpg)
             }
         })
 
@@ -56,7 +59,7 @@
 
         console.log(body);
 
-        //await pb.collection('users').update(pb.authStore.record.id, body)
+        await pb.collection('users').update(pb.authStore.record.id, body)
     }
 
     async function updateOilData(event) {
@@ -79,12 +82,17 @@
 
         console.log(body);
 
-        //await pb.collection('users').update(pb.authStore.record.id, body)
+        await pb.collection('users').update(pb.authStore.record.id, body)
     }
 
     onMount(() => {
         retrieveData();
+        if (!pb.authStore.isValid) {
+            window.location.href = "/";
+        }
     })
+
+    document.documentElement.classList.add('dark');
 
 </script>
 
@@ -114,7 +122,9 @@
 {/each}
 </table>
 
+<div class="grid place-items-center">
 <Button class="cursor-pointer" onclick={() => (oilModal = true)}>Add Oil Change</Button>
+</div>
 <Modal title="Submit Oil Change" form bind:open={oilModal}>
     <form onsubmit={updateOilData} id="oilForm" >
         {#if error}
@@ -162,9 +172,31 @@
         <tr><td>{new Date(date * 1000).toLocaleDateString()}</td>
             <td>{item.mileage}</td>
             <td>{item.gallons}</td>
-            <td>{(((item.mileage)-(item.lastMileage))/(item.lastGallons)).toFixed(2)}</td></tr>
+            <td>{item.mpg}</td></tr>
         </tbody>
     {/each}
 </table>
 
-<Button class="cursor-pointer" onclick={updateGasData}>Add Gas Trip</Button>
+<div class="grid place-items-center">
+    <Button class="cursor-pointer" onclick={() => (gasModal = true)}>Add Gas Trip</Button>
+</div>
+<Modal title="Submit Gas Trip" form bind:open={gasModal}>
+    <form onsubmit={updateGasData} id="gasForm" >
+        {#if error}
+            <Label color="red">{error}</Label>
+        {/if}
+        <Label class="space-y-2">
+            <span>Date</span>
+            <Datepicker bind:value={date}/>
+        </Label>
+        <Label class="space-y-2">
+            <span>Mileage</span>
+            <Input type="number" name="mileage" bind:value={mileage} required />
+        </Label>
+        <Label class="space-y-2">
+            <span>Gallons</span>
+            <Input type="text" name="type" bind:value={gallons} required />
+        </Label>
+        <Button type="submit">Submit</Button>
+    </form>
+</Modal>

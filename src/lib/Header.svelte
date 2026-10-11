@@ -8,19 +8,20 @@
         console.log(pb.authStore.isValid.valueOf())
     }
 </script>
-<Navbar>
+<div class="grid place-items-center">
+<Navbar class="navbar">
     <NavHamburger />
     <NavUl>
         {#if pb.authStore.isValid}
             <NavUl >
-                <NavLi href="/dashboard/">Dashboard</NavLi>
-                <NavLi href="/login/" onclick={logout}>Log Out</NavLi>
+                <NavLi href="/" onclick={logout} class="header">Log Out</NavLi>
             </NavUl>
         {:else}
             <NavUl >
-                <NavLi href="/login/">Log In</NavLi>
-                <NavLi href="/signup/">Sign Up</NavLi>
+                <NavLi href="/" class="header">Log In</NavLi>
+                <NavLi href="/signup/" class="header">Sign Up</NavLi>
             </NavUl>
         {/if}
     </NavUl>
 </Navbar>
+</div>

@@ -13,7 +13,9 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: resolve(__dirname, html),
-                dashboard: resolve(__dirname, 'dashboard/index.html')
+                dashboard: resolve(__dirname, 'dashboard/index.html'),
+                password_reset: resolve(__dirname, 'password_reset/index.html'),
+                signup: resolve(__dirname, 'signup/index.html')
             },
         },
     },
