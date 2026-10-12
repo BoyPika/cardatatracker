@@ -60,6 +60,8 @@
         console.log(body);
 
         await pb.collection('users').update(pb.authStore.record.id, body)
+
+        window.location.reload();
     }
 
     async function updateOilData(event) {
@@ -83,6 +85,8 @@
         console.log(body);
 
         await pb.collection('users').update(pb.authStore.record.id, body)
+
+        window.location.reload();
     }
 
     onMount(() => {
