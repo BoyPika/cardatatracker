@@ -1,9 +1,10 @@
 <script>
 	import '/src/app.css';
     import PocketBase from 'pocketbase';
-    import Header from '/src/lib/Header.svelte'
+    import Header from '/src/lib/Header.svelte';
     import {onMount} from 'svelte';
     import { Button, Modal, Label, Input, Datepicker } from "flowbite-svelte";
+    import { TrashBinOutline } from "flowbite-svelte-icons";
 
     let oilItems = $state({});
     let gasItems = $state({});
@@ -89,6 +90,19 @@
         window.location.reload();
     }
 
+    async function deleteOilRow(index) {
+        console.log("index", index);
+        const oilData = await pb.collection('oil').getOne(pb.authStore.record.id)
+        delete oilData[""];
+    }
+
+    async function deleteGasRow(index) {
+        console.log("index", index);
+        const gasData = await pb.collection('gas').getOne(pb.authStore.record.id)
+        delete gasData[""];
+
+    }
+
     onMount(() => {
         retrieveData();
         if (!pb.authStore.isValid) {
@@ -104,24 +118,27 @@
 
 <table>
     <thead>
-    <tr>
-        <th colspan="4">Oil Changes</th>
-    </tr>
+        <tr>
+            <th colspan="4">Oil Changes</th>
+        </tr>
     </thead>
     <tbody>
-    <tr>
-        <th>Date</th>
-        <th>Mileage</th>
-        <th>Type</th>
-        <th>Quarts</th>
-    </tr>
+        <tr>
+            <th>Date</th>
+            <th>Mileage</th>
+            <th>Type</th>
+            <th>Quarts</th>
+        </tr>
     </tbody>
-{#each Object.entries(oilItems).reverse() as [date, item]}
+{#each Object.entries(oilItems).reverse() as [date, item], index}
     <tbody>
-    <tr><td>{new Date(date * 1000).toLocaleDateString()}</td>
-    <td>{item.mileage}</td>
-    <td>{item.type}</td>
-    <td>{item.qtrs}</td></tr>
+        <tr>
+            <td>{new Date(date * 1000).toLocaleDateString()}</td>
+            <td>{item.mileage}</td>
+            <td>{item.type}</td>
+            <td>{item.qtrs}</td>
+            <td onclick={() => deleteOilRow(index)}><TrashBinOutline /></td>
+        </tr>
     </tbody>
 {/each}
 </table>
@@ -154,29 +171,31 @@
     </form>
 </Modal>
 
-
 <br>
 
 <table>
     <thead>
-    <tr>
-        <th colspan="4">Gas</th>
-    </tr>
+        <tr>
+            <th colspan="4">Gas</th>
+        </tr>
     </thead>
     <tbody>
-    <tr>
-        <th>Date</th>
-        <th>Mileage</th>
-        <th>Gallons</th>
-        <th>MPG</th>
-    </tr>
+        <tr>
+            <th>Date</th>
+            <th>Mileage</th>
+            <th>Gallons</th>
+            <th>MPG</th>
+        </tr>
     </tbody>
-    {#each Object.entries(gasItems).reverse() as [date, item]}
+    {#each Object.entries(gasItems).reverse() as [date, item], index}
         <tbody>
-        <tr><td>{new Date(date * 1000).toLocaleDateString()}</td>
-            <td>{item.mileage}</td>
-            <td>{item.gallons}</td>
-            <td>{item.mpg}</td></tr>
+            <tr>
+                <td>{new Date(date * 1000).toLocaleDateString()}</td>
+                <td>{item.mileage}</td>
+                <td>{item.gallons}</td>
+                <td>{item.mpg}</td>
+                <td onclick={() => deleteGasRow(index)}><TrashBinOutline /></td>
+            </tr>
         </tbody>
     {/each}
 </table>

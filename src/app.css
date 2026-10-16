@@ -36,7 +36,7 @@
     --color-primary-100: #33302f;
     --color-primary-200: #80726f;
     --color-primary-300: #806b66;
-    --color-primary-400: #805e57;
+    --color-primary-400: #804940;
     --color-primary-500: #803d2f;
     --color-primary-600: #802e19;
     --color-primary-700: #802b16;
@@ -44,7 +44,7 @@
     --color-primary-900: #802a14;
 
     --color-secondary-50: #303233;
-    --color-secondary-100: #2d3133;
+    --color-secondary-100: #2f3739;
     --color-secondary-200: #5e7480;
     --color-secondary-300: #406b80;
     --color-secondary-400: #1d6280;
@@ -110,10 +110,17 @@ body {
 }
 
 table, th, td {
-  border: 1px solid white;
+  border: var(--color-secondary-200) 2px solid;
   border-collapse: collapse;
+  border-spacing: 0;
   text-align: center;
   margin: 0.5em auto;
+  th {
+    background: var(--color-secondary-500);
+  }
+  tr:hover {
+    background: var(--color-primary-600);
+  }
 }
 
 .header {
