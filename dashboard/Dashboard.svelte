@@ -10,6 +10,9 @@
     let gasItems = $state({});
     let oilModal = $state(false);
     let gasModal = $state(false);
+    let gallon = $state([]);
+    let miles = $state([]);
+    let lastIndex = $state(-1);
     let error = $state("");
 
     let date = $state(new Date());
@@ -23,13 +26,8 @@
         try {
             const oilData = await pb.collection('oil').getOne(pb.authStore.record.id);
             const gasData = await pb.collection('gas').getOne(pb.authStore.record.id);
-            console.log(oilData);
-            console.log(gasData);
             oilItems = oilData.oil;
             gasItems = gasData.gas;
-            console.log(oilItems);
-            console.log(gasItems);
-
         } catch (e) {
             console.error(e);
         }
@@ -38,27 +36,21 @@
     async function updateGasData(event) {
         event.preventDefault();
         const gasData = await pb.collection('gas').getOne(pb.authStore.record.id);
-        const lastMileage = await pb.collection('gasLastMileage').getOne(pb.authStore.record.id);
-        const gasDate = Math.floor(Date.now(date) / 1000)
-        const mpg = ((mileage - lastMileage.gasLastMileage) / parseFloat(gallons)).toFixed(2);
-        console.log(lastMileage.gasLastMileage);
+        const gasDate = Math.floor(Date.parse(date) / 1000)
+
+        console.log(gasData)
         console.log(gasDate)
 
         let gas = gasData.gas = Object.assign({}, gasData.gas, {
             [gasDate]: {
                 "gallons": parseFloat(gallons),
-                "lastMileage": lastMileage.gasLastMileage,
-                "mileage": mileage,
-                "mpg": parseFloat(mpg)
+                "mileage": mileage
             }
         })
 
         let body = {
-            gas,
-            "gasLastMileage": mileage
+            gas
         }
-
-        console.log(body);
 
         await pb.collection('users').update(pb.authStore.record.id, body)
 
@@ -69,7 +61,6 @@
         event.preventDefault();
         const oilData = await pb.collection('oil').getOne(pb.authStore.record.id);
         const oilDate = Math.floor(Date.parse(date) / 1000)
-        console.log(oilDate);
 
         let oil = oilData.oil = Object.assign({}, oilData.oil, {
             [oilDate]: {
@@ -83,30 +74,35 @@
             oil
         }
 
-        console.log(body);
-
         await pb.collection('users').update(pb.authStore.record.id, body)
 
         window.location.reload();
     }
 
-    async function deleteOilRow(index) {
-        console.log("index", index);
+    async function deleteOilRow(date) {
         const oilData = await pb.collection('oil').getOne(pb.authStore.record.id)
-        delete oilData[""];
+        delete oilData.oil[date];
+        await pb.collection('users').update(pb.authStore.record.id, oilData)
+        window.location.reload();
     }
 
-    async function deleteGasRow(index) {
-        console.log("index", index);
+    async function deleteGasRow(date) {
         const gasData = await pb.collection('gas').getOne(pb.authStore.record.id)
-        delete gasData[""];
-
+        delete gasData.gas[date];
+        await pb.collection('users').update(pb.authStore.record.id, gasData)
+        window.location.reload();
     }
 
-    onMount(() => {
-        retrieveData();
+    onMount(async () => {
         if (!pb.authStore.isValid) {
             window.location.href = "/";
+        }
+        await retrieveData();
+        const gasData = await pb.collection('gas').getOne(pb.authStore.record.id)
+        for (const [date, item] of Object.entries(gasData.gas).reverse()){
+            gallon.push(item.gallons)
+            miles.push(item.mileage)
+            lastIndex++
         }
     })
 
@@ -130,14 +126,14 @@
             <th>Quarts</th>
         </tr>
     </tbody>
-{#each Object.entries(oilItems).reverse() as [date, item], index}
+{#each Object.entries(oilItems).reverse() as [date, item]}
     <tbody>
         <tr>
             <td>{new Date(date * 1000).toLocaleDateString()}</td>
             <td>{item.mileage}</td>
             <td>{item.type}</td>
             <td>{item.qtrs}</td>
-            <td onclick={() => deleteOilRow(index)}><TrashBinOutline /></td>
+            <td onclick={() => deleteOilRow(date)}><TrashBinOutline class="delete"/></td>
         </tr>
     </tbody>
 {/each}
@@ -188,13 +184,16 @@
         </tr>
     </tbody>
     {#each Object.entries(gasItems).reverse() as [date, item], index}
+
         <tbody>
             <tr>
                 <td>{new Date(date * 1000).toLocaleDateString()}</td>
                 <td>{item.mileage}</td>
                 <td>{item.gallons}</td>
-                <td>{item.mpg}</td>
-                <td onclick={() => deleteGasRow(index)}><TrashBinOutline /></td>
+                <td>{#if index !== lastIndex}
+                    {((miles[index]-miles[index+1])/gallon[index+1]).toFixed(2)}
+                    {/if}</td>
+                <td onclick={() => deleteGasRow(date)}><TrashBinOutline class="delete"/></td>
             </tr>
         </tbody>
     {/each}
