@@ -4,7 +4,6 @@
     const pb = new PocketBase('https://database.hornethub.xyz/');
     import {Button, Card, Input, Label, Alert} from "flowbite-svelte";
     import Header from '/src/lib/Header.svelte'
-    document.documentElement.classList.add('dark');
 
     let email = $state();
     let password = $state();
@@ -45,6 +44,16 @@
                 window.location.href = "/dashboard/";
             }
         })
+    }
+
+    if (
+        localStorage.getItem('color-theme') === 'dark' ||
+        (!('color-theme' in localStorage) &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
     }
 
 </script>

@@ -6,58 +6,32 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-  --color-primary-50: #fff5f2;
-  --color-primary-100: #fff1ee;
-  --color-primary-200: #ffe4de;
-  --color-primary-300: #ffd5cc;
-  --color-primary-400: #ffbcad;
-  --color-primary-500: #fe795d;
-  --color-primary-600: #ef562f;
-  --color-primary-700: #eb4f27;
-  --color-primary-800: #cc4522;
-  --color-primary-900: #a5371b;
-
-  --color-secondary-50: #f0f9ff;
-  --color-secondary-100: #e0f2fe;
-  --color-secondary-200: #bae6fd;
-  --color-secondary-300: #7dd3fc;
-  --color-secondary-400: #38bdf8;
-  --color-secondary-500: #0ea5e9;
-  --color-secondary-600: #0284c7;
-  --color-secondary-700: #0369a1;
-  --color-secondary-800: #075985;
-  --color-secondary-900: #0c4a6e;
+:root {
+  color-scheme: light dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-primary-50: #333130;
-    --color-primary-100: #33302f;
-    --color-primary-200: #80726f;
-    --color-primary-300: #806b66;
-    --color-primary-400: #804940;
-    --color-primary-500: #803d2f;
-    --color-primary-600: #802e19;
-    --color-primary-700: #802b16;
-    --color-primary-800: #802b16;
-    --color-primary-900: #802a14;
+@theme {
+  --color-primary-50: light-dark(#fff5f2, #333130);
+  --color-primary-100: light-dark(#fff1ee, #33302f);
+  --color-primary-200: light-dark(#ffe4de, #80726f);
+  --color-primary-300: light-dark(#ffd5cc, #806b66);
+  --color-primary-400: light-dark(#ffbcad, #804940);
+  --color-primary-500: light-dark(#fe795d, #803d2f);
+  --color-primary-600: light-dark(#ef562f, #802e19);
+  --color-primary-700: light-dark(#eb4f27, #802b16);
+  --color-primary-800: light-dark(#cc4522, #802b16);
+  --color-primary-900: light-dark(#a5371b, #802a14);
 
-    --color-secondary-50: #303233;
-    --color-secondary-100: #2f3739;
-    --color-secondary-200: #5e7480;
-    --color-secondary-300: #406b80;
-    --color-secondary-400: #1d6280;
-    --color-secondary-500: #085a80;
-    --color-secondary-600: #015580;
-    --color-secondary-700: #035480;
-    --color-secondary-800: #0b5073;
-    --color-secondary-900: #0b4566;
-  }
-  body {
-    background-color: var(--color-primary-100);
-    color: white;
-  }
+  --color-secondary-50: light-dark(#f0f9ff, #303233);
+  --color-secondary-100: light-dark(#e0f2fe, #2f3739);
+  --color-secondary-200: light-dark(#bae6fd, #5e7480);
+  --color-secondary-300: light-dark(#7dd3fc, #406b80);
+  --color-secondary-400: light-dark(#38bdf8, #1d6280);
+  --color-secondary-500: light-dark(#0ea5e9, #085a80);
+  --color-secondary-600: light-dark(#0284c7, #015580);
+  --color-secondary-700: light-dark(#0369a1, #035480);
+  --color-secondary-800: light-dark(#075985, #0b5073);
+  --color-secondary-900: light-dark(#0c4a6e, #0b4566);
 }
 
 @source "../node_modules/flowbite-svelte/dist";
@@ -78,34 +52,35 @@ button {
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
-  :hover {
-    border-color: #646cff;
-  }
-  :focus,
-  :focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
-  }
 }
 
-body {
+button:hover {
+  border-color: var(--color-secondary-400);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+main {
   margin: 0;
-  display: block;
+  display: flow;
   position: relative;
   place-items: center;
-  min-width: 480px;
-  min-height: 100vh;
   z-index: 0;
 }
+
 
 .navbar {
   position: relative;
   border-radius: 8px;
   border: 1px solid transparent;
-  top: 0;
-  right: 0;
   text-align: center;
-  z-index: 1;
-
+  width: 95vw;
+  background-color: var(--color-primary-100);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 table, th, td {
@@ -117,6 +92,10 @@ table, th, td {
   th {
     background: var(--color-secondary-500);
   }
+  th,
+  td {
+    padding: 10px;
+  }
   tr:hover {
     background: var(--color-primary-600);
   }
@@ -126,9 +105,8 @@ table, th, td {
   background: var(--color-primary-600);
   color: white;
   text-align: center;
-  margin: 0.6em 1.2em;
+  margin: 0.6em 50vw;
 }
-
 .delete:hover {
   cursor: pointer;
 }

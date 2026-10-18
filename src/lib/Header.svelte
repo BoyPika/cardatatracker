@@ -1,5 +1,5 @@
 <script>
-    import {Navbar, NavLi, NavHamburger, NavUl, NavBrand } from 'flowbite-svelte';
+    import {Navbar, NavLi, NavHamburger, NavUl } from 'flowbite-svelte';
     import PocketBase from "pocketbase";
     const pb = new PocketBase('http://localhost:8090/');
     async function logout() {
@@ -8,7 +8,7 @@
         console.log(pb.authStore.isValid.valueOf())
     }
 </script>
-<div class="grid place-items-center">
+<div>
 <Navbar class="navbar">
     <NavHamburger />
     <NavUl>

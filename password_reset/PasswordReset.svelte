@@ -15,7 +15,15 @@
 
     }
 
-    document.documentElement.classList.add('dark');
+    if (
+        localStorage.getItem('color-theme') === 'dark' ||
+        (!('color-theme' in localStorage) &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
 
 </script>
 
@@ -28,7 +36,7 @@
                 <span>Email</span>
                 <Input type="email" name="email" placeholder="user@example.com" bind:value={email} />
             </Label>
-            <Button class="w-full" type="submit" href="/reset_password/">Reset Password</Button>
+            <Button class="w-full" type="submit">Reset Password</Button>
         </form>
     </Card>
 </main>
