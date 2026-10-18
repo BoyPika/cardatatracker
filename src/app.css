@@ -64,7 +64,6 @@
 @source "../node_modules/flowbite-svelte-icons/dist";
 
 @layer base {
-  /* disable chrome cancel button */
   input[type="search"]::-webkit-search-cancel-button {
     display: none;
   }
@@ -79,13 +78,13 @@ button {
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  :hover {
+    border-color: #646cff;
+  }
+  :focus,
+  :focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
 }
 
 body {
