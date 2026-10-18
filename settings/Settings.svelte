@@ -5,7 +5,7 @@
     import { onMount } from 'svelte';
     import { Card, Label, Radio, Button } from 'flowbite-svelte'
 
-    const pb = new PocketBase('https://database.hornethub.xyz/');
+    const pb = new PocketBase('https://database.hornethub.xyz');
 
     let distance = $state("");
     let volume = $state("");
@@ -26,7 +26,7 @@
     }
 
     onMount(async () => {
-        const kilometer = await pb.collection('kilometers').getOne(pb.authStore.record.id)
+        const kilometer = await pb.collection('users').getOne(pb.authStore.record.id);
         const liters = await pb.collection('liters').getOne(pb.authStore.record.id);
         const eco = await pb.collection('economy').getOne(pb.authStore.record.id);
         const qrts = await pb.collection('quarts').getOne(pb.authStore.record.id);

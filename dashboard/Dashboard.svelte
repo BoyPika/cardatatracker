@@ -3,7 +3,7 @@
     import PocketBase from 'pocketbase';
     import Header from '/src/lib/Header.svelte';
     import { onMount } from 'svelte';
-    import { Button, Modal, Label, Input, Datepicker } from "flowbite-svelte";
+    import { Button, Modal, Label, Input, Datepicker, Accordion, AccordionItem } from "flowbite-svelte";
     import { TrashBinOutline } from "flowbite-svelte-icons";
 
     let oilItems = $state({});
@@ -13,9 +13,11 @@
     let oilModal = $state(false);
     let gasModal = $state(false);
     let customModal = $state(false);
+    let addCarModal = $state(false);
 
     let gallon = $state([]);
     let miles = $state([]);
+    let cars = $state([]);
     let lastIndex = $state(-1);
 
     let error = $state("");
@@ -43,6 +45,7 @@
             const liters = await pb.collection('liters').getOne(pb.authStore.record.id);
             const eco = await pb.collection('economy').getOne(pb.authStore.record.id);
             const qrts = await pb.collection('quarts').getOne(pb.authStore.record.id);
+            const car = await pb.collection('cars').getOne(pb.authStore.record.id);
             oilItems = oilData.oil;
             gasItems = gasData.gas;
             customItems = customData.custom;
@@ -50,6 +53,7 @@
             volume = String(liters.ltrs);
             economy = String(eco.eco);
             quarts = String(qrts.volume);
+            cars = car.cars;
         } catch (e) {
             console.error(e);
         }
@@ -123,6 +127,10 @@
         window.location.reload();
     }
 
+    async function updateCarData(event) {
+        event.preventDefault();
+    }
+
     async function deleteOilRow(date) {
         const oilData = await pb.collection('oil').getOne(pb.authStore.record.id)
         delete oilData.oil[date];
@@ -170,150 +178,176 @@
 
 <Header />
 <br>
-<table>
-    <thead>
-        <tr>
-            <th colspan="5">Oil Changes</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th>Date</th>
-            {#if distance === "0"}
-                <th>Mileage</th>
-            {:else if distance === "1"}
-                <th>Kilometers</th>
-            {/if}
-            <th>Type</th>
-            {#if quarts === "0"}
-                <th>Quarts</th>
-            {:else if quarts === "1"}
-                <th>Liters</th>
-            {/if}
-            <th></th>
-        </tr>
-    </tbody>
-{#each Object.entries(oilItems).reverse() as [date, item]}
-    <tbody>
-        <tr>
-            <td>{new Date(date * 1000).toLocaleDateString()}</td>
-            <td>{item.mileage}</td>
-            <td>{item.type}</td>
-            <td>{item.qtrs}</td>
-            <td onclick={() => deleteOilRow(date)}><TrashBinOutline class="delete"/></td>
-        </tr>
-    </tbody>
-{/each}
-</table>
 
-<div class="grid place-items-center">
-<Button class="cursor-pointer" onclick={() => (oilModal = true)}>Add Oil Change</Button>
-</div>
+<Accordion>
+    {#each Object.entries(cars) as [index, item]}
+        {#if true}
+            <AccordionItem>
+                {#snippet header()}{item.nickname}{/snippet}
+                <table>
+                    <thead>
+                    <tr>
+                        <th colspan="5">Oil Changes</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>Date</th>
+                        {#if distance === "0"}
+                            <th>Mileage</th>
+                        {:else if distance === "1"}
+                            <th>Kilometers</th>
+                        {/if}
+                        <th>Type</th>
+                        {#if quarts === "0"}
+                            <th>Quarts</th>
+                        {:else if quarts === "1"}
+                            <th>Liters</th>
+                        {/if}
+                        <th></th>
+                    </tr>
+                    </tbody>
+                    {#each Object.entries(oilItems).reverse() as [date, item]}
+                        <tbody>
+                        <tr>
+                            <td>{new Date(date * 1000).toLocaleDateString()}</td>
+                            <td>{Number(item.mileage).toLocaleString()}</td>
+                            <td>{item.type}</td>
+                            <td>{item.qtrs.toLocaleString()}</td>
+                            <td onclick={() => deleteOilRow(date)}><TrashBinOutline class="delete"/></td>
+                        </tr>
+                        </tbody>
+                    {/each}
+                </table>
+
+                <div class="grid place-items-center">
+                    <Button class="cursor-pointer" onclick={() => (oilModal = true)}>Add Oil Change</Button>
+                </div>
+
+                <br>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th colspan="5">Gas</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>Date</th>
+                        {#if distance === "0"}
+                            <th>Mileage</th>
+                        {:else if distance === "1"}
+                            <th>Kilometers</th>
+                        {/if}
+                        {#if volume === "0"}
+                            <th>Gallons</th>
+                        {:else if volume === "1"}
+                            <th>Liters</th>
+                        {/if}
+                        {#if distance ==="0"}
+                            {#if volume === "0"}
+                                {#if economy === "0"}
+                                    <th>MPG</th>
+                                {:else if economy === "1"}
+                                    <th>gal/100mi</th>
+                                {/if}
+                            {:else if volume === "1"}
+                                {#if economy === "0"}
+                                    <th>mi/L</th>
+                                {:else if economy === "1"}
+                                    <th>L/100mi</th>
+                                {/if}
+                            {/if}
+                        {:else if distance === "1"}
+                            {#if volume === "0"}
+                                {#if economy === "0"}
+                                    <th>km/gal</th>
+                                {:else if economy === "1"}
+                                    <th>gal/100km</th>
+                                {/if}
+                            {:else if volume === "1"}
+                                {#if economy === "0"}
+                                    <th>km/L</th>
+                                {:else if economy === "1"}
+                                    <th>L/100km</th>
+                                {/if}
+                            {/if}
+                        {/if}
+                        <th></th>
+                    </tr>
+                    </tbody>
+                    {#each Object.entries(gasItems).reverse() as [date, item], index}
+                        <tbody>
+                        <tr>
+                            <td>{new Date(date * 1000).toLocaleDateString()}</td>
+                            <td>{Number(item.mileage).toLocaleString()}</td>
+                            <td>{Number(item.gallons).toLocaleString()}</td>
+                            <td>
+                                {#if index !== lastIndex}
+                                    {#if economy === "0"}
+                                        {((miles[index]-miles[index+1])/gallon[index+1]).toFixed(2).toLocaleString()}
+                                    {:else if economy === "1"}
+                                        {((gallon[index+1]/(miles[index]-miles[index+1]))*100).toFixed(2).toLocaleString()}
+                                    {/if}
+                                {/if}
+                            </td>
+                            <td onclick={() => deleteGasRow(date)}><TrashBinOutline class="delete"/></td>
+                        </tr>
+                        </tbody>
+                    {/each}
+                </table>
+
+                <div class="grid place-items-center">
+                    <Button class="cursor-pointer" onclick={() => (gasModal = true)}>Add Gas Trip</Button>
+                </div>
+
+                <br>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th colspan="5">Custom Data</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>Date</th>
+                        {#if distance === "0"}
+                            <th>Mileage</th>
+                        {:else if distance === "1"}
+                            <th>Kilometers</th>
+                        {/if}
+                        <th>Item</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                    </tbody>
+                    {#each Object.entries(customItems).reverse() as [date, item]}
+                        <tbody>
+                        <tr>
+                            <td>{new Date(date * 1000).toLocaleDateString()}</td>
+                            <td>{Number(item.mileage).toLocaleString()}</td>
+                            <td>{item.item}</td>
+                            <td>{item.description}</td>
+                            <td onclick={() => deleteCustomRow(date)}><TrashBinOutline class="delete"/></td>
+                        </tr>
+                        </tbody>
+                    {/each}
+                </table>
+
+                <div class="grid place-items-center">
+                    <Button class="cursor-pointer" onclick={() => (customModal = true)}>Add Custom Service</Button>
+                </div>
+            </AccordionItem>
+        {/if}
+    {/each}
+</Accordion>
 
 <br>
 
-<table>
-    <thead>
-        <tr>
-            <th colspan="5">Gas</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th>Date</th>
-            {#if distance === "0"}
-                <th>Mileage</th>
-            {:else if distance === "1"}
-                <th>Kilometers</th>
-            {/if}
-            {#if volume === "0"}
-                <th>Gallons</th>
-            {:else if volume === "1"}
-                <th>Liters</th>
-            {/if}
-            {#if distance ==="0"}
-                {#if volume === "0"}
-                    {#if economy === "0"}
-                        <th>MPG</th>
-                    {:else if economy === "1"}
-                        <th>gal/100mi</th>
-                    {/if}
-                {:else if volume === "1"}
-                    {#if economy === "0"}
-                        <th>mi/L</th>
-                    {:else if economy === "1"}
-                        <th>L/100mi</th>
-                    {/if}
-                {/if}
-            {:else if distance === "1"}
-                {#if volume === "0"}
-                    {#if economy === "0"}
-                        <th>km/gal</th>
-                    {:else if economy === "1"}
-                        <th>gal/100km</th>
-                    {/if}
-                {:else if volume === "1"}
-                    {#if economy === "0"}
-                        <th>km/L</th>
-                    {:else if economy === "1"}
-                        <th>L/100km</th>
-                    {/if}
-                {/if}
-            {/if}
-            <th></th>
-        </tr>
-    </tbody>
-    {#each Object.entries(gasItems).reverse() as [date, item], index}
-        <tbody>
-            <tr>
-                <td>{new Date(date * 1000).toLocaleDateString()}</td>
-                <td>{item.mileage}</td>
-                <td>{item.gallons}</td>
-                <td>{#if index !== lastIndex}
-                    {((miles[index]-miles[index+1])/gallon[index+1]).toFixed(2)}
-                    {/if}</td>
-                <td onclick={() => deleteGasRow(date)}><TrashBinOutline class="delete"/></td>
-            </tr>
-        </tbody>
-    {/each}
-</table>
-
 <div class="grid place-items-center">
-    <Button class="cursor-pointer" onclick={() => (gasModal = true)}>Add Gas Trip</Button>
-</div>
-
-<br>
-
-<table>
-    <thead>
-        <tr>
-            <th colspan="5">Custom Data</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th>Date</th>
-            <th>Mileage</th>
-            <th>Item</th>
-            <th>Description</th>
-            <th></th>
-        </tr>
-    </tbody>
-    {#each Object.entries(customItems).reverse() as [date, item]}
-        <tbody>
-            <tr>
-                <td>{new Date(date * 1000).toLocaleDateString()}</td>
-                <td>{item.mileage}</td>
-                <td>{item.item}</td>
-                <td>{item.description}</td>
-                <td onclick={() => deleteCustomRow(date)}><TrashBinOutline class="delete"/></td>
-            </tr>
-        </tbody>
-    {/each}
-</table>
-
-<div class="grid place-items-center">
-    <Button class="cursor-pointer" onclick={() => (customModal = true)}>Add Custom Service</Button>
+    <Button class="cursor-pointer" onclick={() => (addCarModal = true)}>Add a Car</Button>
 </div>
 
 <Modal title="Submit Oil Change" form bind:open={oilModal}>
@@ -326,7 +360,11 @@
             <Datepicker bind:value={date}/>
         </Label>
         <Label class="space-y-2">
-            <span>Mileage</span>
+            {#if distance === "0"}
+                <span>Mileage</span>
+            {:else if distance === "1"}
+                <span>Kilometers</span>
+            {/if}
             <Input type="number" name="mileage" bind:value={mileage} required />
         </Label>
         <Label class="space-y-2">
@@ -334,7 +372,11 @@
             <Input type="text" name="type" bind:value={type} required />
         </Label>
         <Label class="space-y-2">
-            <span>Quarts</span>
+            {#if quarts === "0"}
+                <span>Quarts</span>
+            {:else if quarts === "1"}
+                <span>Liters</span>
+            {/if}
             <Input type="number" name="qrts" bind:value={qrts} required />
         </Label>
         <Button type="submit">Submit</Button>
@@ -351,11 +393,19 @@
             <Datepicker bind:value={date}/>
         </Label>
         <Label class="space-y-2">
-            <span>Mileage</span>
+            {#if distance === "0"}
+                <span>Mileage</span>
+            {:else if distance === "1"}
+                <span>Kilometers</span>
+            {/if}
             <Input type="number" name="mileage" bind:value={mileage} required />
         </Label>
         <Label class="space-y-2">
-            <span>Gallons</span>
+            {#if volume === "0"}
+                <span>Gallons</span>
+            {:else if volume === "1"}
+                <span>Liters</span>
+            {/if}
             <Input type="text" name="type" bind:value={gallons} required />
         </Label>
         <Button type="submit">Submit</Button>
@@ -372,7 +422,11 @@
             <Datepicker bind:value={date}/>
         </Label>
         <Label class="space-y-2">
-            <span>Mileage</span>
+            {#if distance === "0"}
+                <span>Mileage</span>
+            {:else if distance === "1"}
+                <span>Kilometers</span>
+            {/if}
             <Input type="number" name="mileage" bind:value={mileage} required />
         </Label>
         <Label class="space-y-2">
@@ -382,6 +436,18 @@
         <Label class="space-y-2">
             <span>Description of Service Done</span>
             <Input type="text" name="customDescription" bind:value={customDescription} />
+        </Label>
+        <Button type="submit">Submit</Button>
+    </form>
+</Modal>
+
+<Modal title="Add Car" form bind:open={addCarModal}>
+    <form onsubmit={updateCarData}>
+        {#if error}
+            <Label color="red">{error}</Label>
+        {/if}
+        <Label class="space-y-2">
+            <span>Car Name</span>
         </Label>
         <Button type="submit">Submit</Button>
     </form>
