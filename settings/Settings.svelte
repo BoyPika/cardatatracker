@@ -3,35 +3,22 @@
     import Header from "/src/lib/Header.svelte"
     import PocketBase from 'pocketbase';
     import { onMount } from 'svelte';
-    import { Card, Label, Select, Button } from 'flowbite-svelte'
+    import { Card, Label, Radio, Button } from 'flowbite-svelte'
 
     const pb = new PocketBase('https://database.hornethub.xyz/');
 
     let distance = $state("");
     let volume = $state("");
-
-    let distanceUnits = [
-        { value: "mi", name: "Miles" },
-        { value: "km", name: "Kilometers" }
-    ];
-    let volumeUnites = [
-        { value: "ga", name: "Gallons"},
-        { value: "lt", name: "Liters/Litres"}
-    ]
+    let economy = $state("");
+    let quarts = $state("");
 
     async function submit(event) {
         event.preventDefault();
-        let km = false;
-        let ltrs = false;
-        if (distance === "km") {
-            km = true;
-        }
-        if (volume === "lt") {
-            ltrs = true;
-        }
         let body = {
-            km,
-            ltrs
+            "km": Number(distance),
+            "ltrs": Number(volume),
+            "eco": Number(economy),
+            "volume": Number(quarts)
         }
 
         await pb.collection('users').update(pb.authStore.record.id, body);
@@ -40,9 +27,13 @@
 
     onMount(async () => {
         const kilometer = await pb.collection('kilometers').getOne(pb.authStore.record.id)
-        if (!kilometer) {
-            distance = "mi"
-        }
+        const liters = await pb.collection('liters').getOne(pb.authStore.record.id);
+        const eco = await pb.collection('economy').getOne(pb.authStore.record.id);
+        const qrts = await pb.collection('quarts').getOne(pb.authStore.record.id);
+        distance = String(kilometer.km);
+        volume = String(liters.ltrs)
+        economy = String(eco.eco)
+        quarts = String(qrts.volume)
     })
 
     if (
@@ -64,13 +55,45 @@
         <form class="flex flex-col space-y-6" action="/dashboard/" onsubmit={submit}>
             <h3 class="text-center">Settings</h3>
             <Label class="space-y-2">
-                <span>Miles or Kilometers?</span>
-                <Select class="mt-2" items={distanceUnits} bind:value={distance} required />
+                <span>How would you prefer to measure oil quantity?</span>
+                <Radio value="0" bind:group={quarts}>Quarts</Radio>
+                <Radio value="1" bind:group={quarts}>Liters</Radio>
             </Label>
             <Label class="space-y-2">
-                <span>Gallons or Liters (Litres)?</span>
-                <Select class="mt-2" items={volumeUnites} bind:value={volume} required />
+                <span>What unit of distance do you prefer?</span>
+                <Radio value="0" bind:group={distance}>Miles</Radio>
+                <Radio value="1" bind:group={distance}>Kilometers</Radio>
             </Label>
+            <Label class="space-y-2">
+                <span>What unit of volume do you prefer?</span>
+                <Radio value="0" bind:group={volume}>Gallons</Radio>
+                <Radio value="1" bind:group={volume}>Liters</Radio>
+            </Label>
+            {#if volume === "1" && distance === "1"}
+                <Label class="space-y-2">
+                    <span>How do you want fuel economy measured?</span>
+                    <Radio value="0" bind:group={economy}>Kilometers per Liter (km/L)</Radio>
+                    <Radio value="1" bind:group={economy}>Liters per 100 Kilometers (L/100km)</Radio>
+                </Label>
+            {:else if volume === "0" && distance === "1"}
+                <Label class="space-y-2">
+                    <span>How do you want fuel economy measured?</span>
+                    <Radio value="0" bind:group={economy}>Kilometers per Gallon (km/gal)</Radio>
+                    <Radio value="1" bind:group={economy}>Gallons per 100 Kilometers (gal/100km)</Radio>
+                </Label>
+            {:else if volume === "1" && distance === "0"}
+                <Label class="space-y-2">
+                    <span>How do you want fuel economy measured?</span>
+                    <Radio value="0" bind:group={economy}>Miles per Liter (mi/L)</Radio>
+                    <Radio value="1" bind:group={economy}>Liters per 100 Miles (L/100mi)</Radio>
+                </Label>
+            {:else if volume === "0" && distance === "0"}
+                <Label class="space-y-2">
+                    <span>How do you want fuel economy measured?</span>
+                    <Radio value="0" bind:group={economy}>Miles per Gallon (mpg)</Radio>
+                    <Radio value="1" bind:group={economy}>Gallons per 100 Miles (gal/100mi)</Radio>
+                </Label>
+            {/if}
             <Button class="w-full" type="submit">Update Settings</Button>
         </form>
     </Card>

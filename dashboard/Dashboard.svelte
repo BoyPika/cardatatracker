@@ -28,15 +28,28 @@
     let customItem = $state("");
     let customDescription = $state("");
 
+    let distance = $state("");
+    let volume = $state("");
+    let economy = $state("");
+    let quarts = $state("");
+
     const pb = new PocketBase('https://database.hornethub.xyz/');
     async function retrieveData() {
         try {
             const oilData = await pb.collection('oil').getOne(pb.authStore.record.id);
             const gasData = await pb.collection('gas').getOne(pb.authStore.record.id);
             const customData = await pb.collection('custom').getOne(pb.authStore.record.id);
+            const kilometer = await pb.collection('kilometers').getOne(pb.authStore.record.id);
+            const liters = await pb.collection('liters').getOne(pb.authStore.record.id);
+            const eco = await pb.collection('economy').getOne(pb.authStore.record.id);
+            const qrts = await pb.collection('quarts').getOne(pb.authStore.record.id);
             oilItems = oilData.oil;
             gasItems = gasData.gas;
             customItems = customData.custom;
+            distance = String(kilometer.km);
+            volume = String(liters.ltrs);
+            economy = String(eco.eco);
+            quarts = String(qrts.volume);
         } catch (e) {
             console.error(e);
         }
@@ -166,9 +179,17 @@
     <tbody>
         <tr>
             <th>Date</th>
-            <th>Mileage</th>
+            {#if distance === "0"}
+                <th>Mileage</th>
+            {:else if distance === "1"}
+                <th>Kilometers</th>
+            {/if}
             <th>Type</th>
-            <th>Quarts</th>
+            {#if quarts === "0"}
+                <th>Quarts</th>
+            {:else if quarts === "1"}
+                <th>Liters</th>
+            {/if}
             <th></th>
         </tr>
     </tbody>
@@ -200,9 +221,45 @@
     <tbody>
         <tr>
             <th>Date</th>
-            <th>Mileage</th>
-            <th>Gallons</th>
-            <th>MPG</th>
+            {#if distance === "0"}
+                <th>Mileage</th>
+            {:else if distance === "1"}
+                <th>Kilometers</th>
+            {/if}
+            {#if volume === "0"}
+                <th>Gallons</th>
+            {:else if volume === "1"}
+                <th>Liters</th>
+            {/if}
+            {#if distance ==="0"}
+                {#if volume === "0"}
+                    {#if economy === "0"}
+                        <th>MPG</th>
+                    {:else if economy === "1"}
+                        <th>gal/100mi</th>
+                    {/if}
+                {:else if volume === "1"}
+                    {#if economy === "0"}
+                        <th>mi/L</th>
+                    {:else if economy === "1"}
+                        <th>L/100mi</th>
+                    {/if}
+                {/if}
+            {:else if distance === "1"}
+                {#if volume === "0"}
+                    {#if economy === "0"}
+                        <th>km/gal</th>
+                    {:else if economy === "1"}
+                        <th>gal/100km</th>
+                    {/if}
+                {:else if volume === "1"}
+                    {#if economy === "0"}
+                        <th>km/L</th>
+                    {:else if economy === "1"}
+                        <th>L/100km</th>
+                    {/if}
+                {/if}
+            {/if}
             <th></th>
         </tr>
     </tbody>
