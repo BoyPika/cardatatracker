@@ -15,9 +15,9 @@
     let customModal = $state(false);
     let addCarModal = $state(false);
 
-    let gallon = $state([]);
-    let miles = $state([]);
-    let cars = $state([]);
+    let carGallons = $state([[]]);
+    let carMiles = $state([[]]);
+    let carsData = $state([]);
     let lastIndex = $state(-1);
 
     let error = $state("");
@@ -29,6 +29,8 @@
     let gallons = $state();
     let customItem = $state("");
     let customDescription = $state("");
+    let carNickname = $state("");
+    let activeCar = $state(0);
 
     let distance = $state("");
     let volume = $state("");
@@ -53,7 +55,7 @@
             volume = String(liters.ltrs);
             economy = String(eco.eco);
             quarts = String(qrts.volume);
-            cars = car.cars;
+            carsData = car.cars;
         } catch (e) {
             console.error(e);
         }
@@ -69,7 +71,8 @@
             [oilDate]: {
                 "mileage": mileage,
                 "qtrs": qrts,
-                "type": type
+                "type": type,
+                "car": activeCar
             }
         })
 
@@ -91,7 +94,8 @@
         let gas = gasData.gas = Object.assign({}, gasData.gas, {
             [gasDate]: {
                 "gallons": parseFloat(gallons),
-                "mileage": mileage
+                "mileage": mileage,
+                "car": activeCar
             }
         })
 
@@ -114,7 +118,8 @@
             [customDate]: {
                 "item": customItem,
                 "description": customDescription,
-                "mileage": mileage
+                "mileage": mileage,
+                "car": activeCar
             }
         })
 
@@ -129,6 +134,25 @@
 
     async function updateCarData(event) {
         event.preventDefault();
+
+        const carData = await pb.collection('cars').getOne(pb.authStore.record.id);
+        const carDate = Math.floor(Date.now()/1000)
+
+        console.log(carData);
+
+        let cars = carData.cars = Object.assign({}, carData.cars, {
+            [carDate]: {
+                "nickname": carNickname
+            }
+        })
+
+        let body = {
+            cars
+        }
+
+        await pb.collection('users').update(pb.authStore.record.id, body);
+
+        window.location.reload();
     }
 
     async function deleteOilRow(date) {
@@ -152,17 +176,24 @@
         window.location.reload();
     }
 
+    async function deleteCar(index) {
+        const carData = await pb.collection('cars').getOne(pb.authStore.record.id);
+        delete carData.cars[index];
+        await pb.collection('users').update(pb.authStore.record.id, carData)
+        window.location.reload();
+    }
+
+    function getCarGasEntries(index) {
+        return Object.entries(gasItems)
+            .filter(([_, gasItem]) => String(gasItem.car) === String(index))
+            .sort((a, b) => b[0] - a[0]);
+    }
+
     onMount(async () => {
         if (!pb.authStore.isValid) {
             window.location.href = "/";
         }
         await retrieveData();
-        const gasData = await pb.collection('gas').getOne(pb.authStore.record.id)
-        for (const [date, item] of Object.entries(gasData.gas).reverse()){
-            gallon.push(item.gallons)
-            miles.push(item.mileage)
-            lastIndex++
-        }
     })
 
     if (
@@ -180,7 +211,7 @@
 <br>
 
 <Accordion>
-    {#each Object.entries(cars) as [index, item]}
+    {#each Object.entries(carsData) as [index, item]}
         {#if true}
             <AccordionItem>
                 {#snippet header()}{item.nickname}{/snippet}
@@ -208,20 +239,25 @@
                     </tr>
                     </tbody>
                     {#each Object.entries(oilItems).reverse() as [date, item]}
-                        <tbody>
-                        <tr>
-                            <td>{new Date(date * 1000).toLocaleDateString()}</td>
-                            <td>{Number(item.mileage).toLocaleString()}</td>
-                            <td>{item.type}</td>
-                            <td>{item.qtrs.toLocaleString()}</td>
-                            <td onclick={() => deleteOilRow(date)}><TrashBinOutline class="delete"/></td>
-                        </tr>
-                        </tbody>
+                        {#if String(item.car) === index}
+                            <tbody>
+                            <tr>
+                                <td>{new Date(date * 1000).toLocaleDateString()}</td>
+                                <td>{Number(item.mileage).toLocaleString()}</td>
+                                <td>{item.type}</td>
+                                <td>{item.qtrs.toLocaleString()}</td>
+                                <td onclick={() => deleteOilRow(date)}><TrashBinOutline class="delete"/></td>
+                            </tr>
+                            </tbody>
+                        {/if}
                     {/each}
                 </table>
 
                 <div class="grid place-items-center">
-                    <Button class="cursor-pointer" onclick={() => (oilModal = true)}>Add Oil Change</Button>
+                    <Button class="cursor-pointer" onclick={() => {
+                        (oilModal = true)
+                        activeCar = index
+                    }}>Add Oil Change</Button>
                 </div>
 
                 <br>
@@ -277,29 +313,39 @@
                         <th></th>
                     </tr>
                     </tbody>
-                    {#each Object.entries(gasItems).reverse() as [date, item], index}
-                        <tbody>
-                        <tr>
-                            <td>{new Date(date * 1000).toLocaleDateString()}</td>
-                            <td>{Number(item.mileage).toLocaleString()}</td>
-                            <td>{Number(item.gallons).toLocaleString()}</td>
-                            <td>
-                                {#if index !== lastIndex}
-                                    {#if economy === "0"}
-                                        {((miles[index]-miles[index+1])/gallon[index+1]).toFixed(2).toLocaleString()}
-                                    {:else if economy === "1"}
-                                        {((gallon[index+1]/(miles[index]-miles[index+1]))*100).toFixed(2).toLocaleString()}
+                    {#each getCarGasEntries(index) as [date, item], gasIndex}
+                        {@const carGasEntries = getCarGasEntries(index)}
+                        {#if String(item.car) === index}
+                            <tbody>
+                            <tr>
+                                <td>{new Date(date * 1000).toLocaleDateString()}</td>
+                                <td>{Number(item.mileage).toLocaleString()}</td>
+                                <td>{Number(item.gallons).toLocaleString()}</td>
+                                <td>
+                                    {#if gasIndex < carGasEntries.length - 1}
+                                        {@const prevItem = carGasEntries[gasIndex + 1][1]}
+                                        {@const milesDiff = item.mileage - prevItem.mileage}
+                                        {#if milesDiff > 0}
+                                            {#if economy === "0"}
+                                                {(milesDiff / prevItem.gallons).toFixed(2)}
+                                            {:else}
+                                                {((prevItem.gallons / milesDiff) * 100).toFixed(2)}
+                                            {/if}
+                                        {/if}
                                     {/if}
-                                {/if}
-                            </td>
-                            <td onclick={() => deleteGasRow(date)}><TrashBinOutline class="delete"/></td>
-                        </tr>
-                        </tbody>
+                                </td>
+                                <td onclick={() => deleteGasRow(date)}><TrashBinOutline class="delete"/></td>
+                            </tr>
+                            </tbody>
+                        {/if}
                     {/each}
                 </table>
 
                 <div class="grid place-items-center">
-                    <Button class="cursor-pointer" onclick={() => (gasModal = true)}>Add Gas Trip</Button>
+                    <Button class="cursor-pointer" onclick={() => {
+                        (gasModal = true)
+                        activeCar = index
+                    }}>Add Gas Trip</Button>
                 </div>
 
                 <br>
@@ -324,21 +370,31 @@
                     </tr>
                     </tbody>
                     {#each Object.entries(customItems).reverse() as [date, item]}
-                        <tbody>
-                        <tr>
-                            <td>{new Date(date * 1000).toLocaleDateString()}</td>
-                            <td>{Number(item.mileage).toLocaleString()}</td>
-                            <td>{item.item}</td>
-                            <td>{item.description}</td>
-                            <td onclick={() => deleteCustomRow(date)}><TrashBinOutline class="delete"/></td>
-                        </tr>
-                        </tbody>
+                        {#if String(item.car) === index}
+                            <tbody>
+                            <tr>
+                                <td>{new Date(date * 1000).toLocaleDateString()}</td>
+                                <td>{Number(item.mileage).toLocaleString()}</td>
+                                <td>{item.item}</td>
+                                <td>{item.description}</td>
+                                <td onclick={() => deleteCustomRow(date)}><TrashBinOutline class="delete"/></td>
+                            </tr>
+                            </tbody>
+                        {/if}
                     {/each}
                 </table>
 
                 <div class="grid place-items-center">
-                    <Button class="cursor-pointer" onclick={() => (customModal = true)}>Add Custom Service</Button>
+                    <Button class="cursor-pointer" onclick={() => {
+                        (customModal = true)
+                        activeCar = index
+                    }}>Add Custom Service</Button>
                 </div>
+                <br>
+                <br>
+                <dir class="grid place-items-center">
+                <Button class="cursor-pointer" onclick={() => (deleteCar(index))}>Delete Car (THIS IS IRREVERSIBLE)</Button>
+                </dir>
             </AccordionItem>
         {/if}
     {/each}
@@ -379,6 +435,7 @@
             {/if}
             <Input type="number" name="qrts" bind:value={qrts} required />
         </Label>
+        <br>
         <Button type="submit">Submit</Button>
     </form>
 </Modal>
@@ -408,6 +465,7 @@
             {/if}
             <Input type="text" name="type" bind:value={gallons} required />
         </Label>
+        <br>
         <Button type="submit">Submit</Button>
     </form>
 </Modal>
@@ -437,6 +495,7 @@
             <span>Description of Service Done</span>
             <Input type="text" name="customDescription" bind:value={customDescription} />
         </Label>
+        <br>
         <Button type="submit">Submit</Button>
     </form>
 </Modal>
@@ -448,7 +507,9 @@
         {/if}
         <Label class="space-y-2">
             <span>Car Name</span>
+            <Input type="text" name="carNickname" bind:value={carNickname} required />
         </Label>
+        <br>
         <Button type="submit">Submit</Button>
     </form>
 </Modal>
