@@ -2,30 +2,15 @@
 	import '/src/app.css';
     import PocketBase from 'pocketbase';
     const pb = new PocketBase('https://database.hornethub.xyz/');
-    import {Button, Card, Input, Label, Alert} from "flowbite-svelte";
+    import {Button, Card, Input, Label} from "flowbite-svelte";
     import Header from '/src/lib/Header.svelte'
     document.documentElement.classList.add('dark');
 
     let email = $state();
     let password = $state();
-    let alertStatus = $state(false);
-    let error = $state("");
 
-    function submit(event) {
+    async function submit(event) {
         event.preventDefault();
-        if (password.length < 8) {
-            alertStatus = true
-            error = "Password must be at least 8 characters";
-        } else {
-            signup()
-        }
-    }
-
-    function closeAlert() {
-        alertStatus = false
-    }
-
-    async function signup() {
         let body = "{\"email\": \"" + email + "\", \"emailVisibility\": false, \"password\": \"" + password +"\",\"passwordConfirm\": \"" + password + "\"}";
         console.log(body);
 
@@ -68,5 +53,4 @@
         <br>
         <Button class="w-full" onclick={github}>Sign Up With GitHub</Button>
     </Card>
-    <Alert color="red" dismissable onclick={closeAlert} bind:alertStatus>{error}</Alert>
 </main>
