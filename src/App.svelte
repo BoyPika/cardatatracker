@@ -1,7 +1,7 @@
 <script>
 	import './app.css';
     import PocketBase from 'pocketbase';
-    import { Card, Button, Label, Input, Checkbox } from "flowbite-svelte";
+    import { Card, Button, Label, Input } from "flowbite-svelte";
     import Header from './lib/Header.svelte'
     const pb = new PocketBase('https://database.hornethub.xyz/')
 
@@ -43,6 +43,7 @@
 
 </script>
 <Header />
+<br>
 <main class="card">
 <Card class="p-4 sm:p-6 md:p-8 border">
     <form class="flex flex-col space-y-6" action="/dashboard/" onsubmit={submit} >

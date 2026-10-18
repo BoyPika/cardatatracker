@@ -15,7 +15,8 @@ export default defineConfig({
                 main: resolve(__dirname, html),
                 dashboard: resolve(__dirname, 'dashboard/index.html'),
                 password_reset: resolve(__dirname, 'password_reset/index.html'),
-                signup: resolve(__dirname, 'signup/index.html')
+                signup: resolve(__dirname, 'signup/index.html'),
+                settings: resolve(__dirname, 'settings/index.html')
             },
         },
     },

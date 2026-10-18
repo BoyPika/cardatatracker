@@ -65,22 +65,15 @@ button:focus-visible {
 
 main {
   margin: 0;
-  display: flow;
+  display: block;
   position: relative;
   place-items: center;
-  z-index: 0;
+  min-width: 480px;
+  min-height: 100vh;
 }
 
-
 .navbar {
-  position: relative;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  text-align: center;
-  width: 95vw;
-  background-color: var(--color-primary-100);
-  margin-left: auto;
-  margin-right: auto;
+  background: var(--color-secondary-500);
 }
 
 table, th, td {
@@ -105,7 +98,7 @@ table, th, td {
   background: var(--color-primary-600);
   color: white;
   text-align: center;
-  margin: 0.6em 50vw;
+  margin: 0.6em 1.2vw;
 }
 .delete:hover {
   cursor: pointer;
