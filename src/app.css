@@ -36,7 +36,7 @@
     --color-primary-100: #33302f;
     --color-primary-200: #80726f;
     --color-primary-300: #806b66;
-    --color-primary-400: #804940;
+    --color-primary-400: #805e57;
     --color-primary-500: #803d2f;
     --color-primary-600: #802e19;
     --color-primary-700: #802b16;
@@ -44,7 +44,7 @@
     --color-primary-900: #802a14;
 
     --color-secondary-50: #303233;
-    --color-secondary-100: #2f3739;
+    --color-secondary-100: #2d3133;
     --color-secondary-200: #5e7480;
     --color-secondary-300: #406b80;
     --color-secondary-400: #1d6280;
@@ -64,6 +64,7 @@
 @source "../node_modules/flowbite-svelte-icons/dist";
 
 @layer base {
+  /* disable chrome cancel button */
   input[type="search"]::-webkit-search-cancel-button {
     display: none;
   }
@@ -78,13 +79,13 @@ button {
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
-  :hover {
-    border-color: #646cff;
-  }
-  :focus,
-  :focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
-  }
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }
 
 body {
@@ -109,17 +110,10 @@ body {
 }
 
 table, th, td {
-  border: var(--color-secondary-200) 2px solid;
+  border: 1px solid white;
   border-collapse: collapse;
-  border-spacing: 0;
   text-align: center;
   margin: 0.5em auto;
-  th {
-    background: var(--color-secondary-500);
-  }
-  tr:hover {
-    background: var(--color-primary-600);
-  }
 }
 
 .header {
@@ -127,8 +121,4 @@ table, th, td {
   color: white;
   text-align: center;
   margin: 0.6em 1.2em;
-}
-
-.delete:hover {
-  cursor: pointer;
 }
