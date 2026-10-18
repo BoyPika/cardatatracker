@@ -14,9 +14,6 @@
     <NavUl>
         {#if pb.authStore.isValid}
             <NavUl >
-                {#if window.location.pathname !== "/dashboard/"}
-                    <NavLi href="/dashboard/" class="header">Dashboard</NavLi>
-                {/if}
                 <NavLi href="/" onclick={logout} class="header">Log Out</NavLi>
             </NavUl>
         {:else}
