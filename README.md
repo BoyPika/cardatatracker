@@ -2,6 +2,8 @@
 
 This was a website I put together for Prep Week 2 of Terra, which is a part of [Hack Club](https://hackclub.com/)
 
+This code contains only the work completed during Prep Week 2, unlike the master branch which also contains code submitted for prep week 3.
+
 It allows you to collect data on oil changes and gas trips to better understand when your oil may need changed and how many MPGs you get in your car, which is especially helpful in older cars that don't actively track fuel usage.
 
 This project uses the following projects:
